@@ -103,8 +103,8 @@ class _CartScreenState extends State<CartScreen> {
 
                 await supabase.from('deliveries').insert({
                   'order_id': insertedOrder['order_id'],
-                  'courier_id': 5,
-                  'courier_name': 'Ali Çelik',
+                  'courier_id': null,
+                  'courier_name': null,
                   'status': 'Preparing',
                   'estimated_minutes': 35,
                 });
@@ -137,7 +137,20 @@ class _CartScreenState extends State<CartScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Sepetim')),
       body: items.isEmpty
-          ? const Center(child: Text('Sepet boş'))
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.shopping_cart_outlined,
+                    size: 80,
+                    color: Colors.grey,
+                  ),
+                  SizedBox(height: 12),
+                  Text('Sepetiniz boş', style: TextStyle(fontSize: 18)),
+                ],
+              ),
+            )
           : ListView.builder(
               itemCount: items.length,
               itemBuilder: (context, index) {

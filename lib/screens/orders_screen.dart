@@ -46,6 +46,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
           }
 
           final orders = snapshot.data!;
+          if (orders.isEmpty) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.receipt_long, size: 80, color: Colors.grey),
+                  SizedBox(height: 12),
+                  Text('Henüz siparişiniz yok', style: TextStyle(fontSize: 18)),
+                ],
+              ),
+            );
+          }
 
           return ListView.builder(
             itemCount: orders.length,
@@ -68,12 +80,23 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   title: Text(
                     'Sipariş #${order['order_id']} - ${order['total_price']} TL',
                   ),
-                  subtitle: Text(
-                    'Ürünler: $productText\n'
-                    'Durum: ${order['status']}\n'
-                    'Ödeme: ${order['payment_method'] ?? '-'}\n'
-                    'Şehir: ${order['city']}\n'
-                    'Adres: ${order['delivery_address']}',
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Ürünler: $productText'),
+                      const SizedBox(height: 4),
+                      Chip(
+                        label: Text(order['status']),
+                        backgroundColor: order['status'] == 'Delivered'
+                            ? Colors.green.shade100
+                            : order['status'] == 'On Delivery'
+                            ? Colors.orange.shade100
+                            : Colors.red.shade100,
+                      ),
+                      Text('Ödeme: ${order['payment_method'] ?? '-'}'),
+                      Text('Şehir: ${order['city']}'),
+                      Text('Adres: ${order['delivery_address']}'),
+                    ],
                   ),
                 ),
               );

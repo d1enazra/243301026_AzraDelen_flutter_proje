@@ -37,6 +37,70 @@ class _AdminScreenState extends State<AdminScreen> {
     setState(() {});
   }
 
+  Future<void> assignCourier(int orderId) async {
+    final couriers = await supabase
+        .from('users')
+        .select()
+        .eq('role', 'courier');
+
+    String? selectedCourierId;
+    String? selectedCourierName;
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Kurye Ata'),
+          content: DropdownButtonFormField<String>(
+            items: couriers.map<DropdownMenuItem<String>>((courier) {
+              return DropdownMenuItem<String>(
+                value: courier['user_id'].toString(),
+                child: Text(courier['full_name']),
+              );
+            }).toList(),
+            onChanged: (value) {
+              final courier = couriers.firstWhere(
+                (c) => c['user_id'].toString() == value,
+              );
+
+              selectedCourierId = courier['user_id'].toString();
+              selectedCourierName = courier['full_name'];
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('İptal'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await supabase
+                    .from('deliveries')
+                    .update({
+                      'courier_id': int.parse(selectedCourierId!),
+                      'courier_name': selectedCourierName,
+                      'status': 'On Delivery',
+                    })
+                    .eq('order_id', orderId);
+
+                await supabase
+                    .from('orders')
+                    .update({'status': 'On Delivery'})
+                    .eq('order_id', orderId);
+
+                if (!mounted) return;
+
+                Navigator.pop(context);
+                setState(() {});
+              },
+              child: const Text('Kurye Ata'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,22 +138,36 @@ class _AdminScreenState extends State<AdminScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  trailing: PopupMenuButton<String>(
-                    onSelected: (value) {
-                      updateStatus(order['order_id'], value);
-                    },
-                    itemBuilder: (context) => const [
-                      PopupMenuItem(
-                        value: 'Preparing',
-                        child: Text('Preparing'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          assignCourier(order['order_id']);
+                        },
+                        child: const Text('Kurye Ata'),
                       ),
-                      PopupMenuItem(
-                        value: 'On Delivery',
-                        child: Text('On Delivery'),
-                      ),
-                      PopupMenuItem(
-                        value: 'Delivered',
-                        child: Text('Delivered'),
+
+                      const SizedBox(width: 8),
+
+                      PopupMenuButton<String>(
+                        onSelected: (value) {
+                          updateStatus(order['order_id'], value);
+                        },
+                        itemBuilder: (context) => const [
+                          PopupMenuItem(
+                            value: 'Preparing',
+                            child: Text('Preparing'),
+                          ),
+                          PopupMenuItem(
+                            value: 'On Delivery',
+                            child: Text('On Delivery'),
+                          ),
+                          PopupMenuItem(
+                            value: 'Delivered',
+                            child: Text('Delivered'),
+                          ),
+                        ],
                       ),
                     ],
                   ),

@@ -1,6 +1,24 @@
 import 'package:flutter/material.dart';
 import '../services/cart_service.dart';
 
+String getFoodImage(String name) {
+  final lower = name.toLowerCase();
+
+  if (lower.contains('lahmacun')) return 'assets/images/lahmacun.jpg';
+  if (lower.contains('pide')) return 'assets/images/pide.jpg';
+  if (lower.contains('ayran')) return 'assets/images/ayran.jpg';
+  if (lower.contains('su')) return 'assets/images/su.jpg';
+  if (lower.contains('mercimek')) return 'assets/images/mercimek_corbasi.jpg';
+  if (lower.contains('çoban')) return 'assets/images/coban_salata.jpg';
+  if (lower.contains('kuru fasulye')) return 'assets/images/kuru_fasulye.jpg';
+  if (lower.contains('tavuk')) return 'assets/images/tavuk_izgara.jpg';
+  if (lower.contains('baklava')) return 'assets/images/baklava.jpg';
+  if (lower.contains('sütlaç')) return 'assets/images/sutlac.jpg';
+  if (lower.contains('kazandibi')) return 'assets/images/kazandibi.jpg';
+
+  return 'assets/images/default_food.jpg';
+}
+
 class FoodDetailScreen extends StatelessWidget {
   final Map<String, dynamic> item;
 
@@ -15,12 +33,21 @@ class FoodDetailScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Image.network(
-              item['image_url'] ??
-                  'https://images.unsplash.com/photo-1546069901-ba9599a7e63c',
-              height: 250,
+            SizedBox(
+              height: 320,
               width: double.infinity,
-              fit: BoxFit.cover,
+              child: Image(
+                image: AssetImage(getFoodImage(item['item_name'])),
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.network(
+                    item['image_url'] ??
+                        'https://images.unsplash.com/photo-1546069901-ba9599a7e63c',
+                    fit: BoxFit.cover,
+                  );
+                },
+              ),
             ),
 
             Padding(

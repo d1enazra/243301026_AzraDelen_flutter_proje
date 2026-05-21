@@ -36,6 +36,18 @@ class _LogsScreenState extends State<LogsScreen> {
           }
 
           final logs = snapshot.data ?? [];
+          if (logs.isEmpty) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.history, size: 80, color: Colors.grey),
+                  SizedBox(height: 12),
+                  Text('Log kaydı bulunamadı', style: TextStyle(fontSize: 18)),
+                ],
+              ),
+            );
+          }
 
           return ListView.builder(
             itemCount: logs.length,

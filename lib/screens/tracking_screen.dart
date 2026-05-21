@@ -21,6 +21,25 @@ class _TrackingScreenState extends State<TrackingScreen> {
         .order('delivery_id', ascending: false);
   }
 
+  Future<void> markAsDelivered(int orderId, int deliveryId) async {
+    await supabase
+        .from('deliveries')
+        .update({'status': 'Delivered'})
+        .eq('delivery_id', deliveryId);
+
+    await supabase
+        .from('orders')
+        .update({'status': 'Delivered'})
+        .eq('order_id', orderId);
+
+    await supabase.from('logs').insert({
+      'user_id': SessionService.userId,
+      'action': 'Kurye sipariş #$orderId teslim edildi olarak işaretledi',
+    });
+
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,6 +71,17 @@ class _TrackingScreenState extends State<TrackingScreen> {
                     'Adres: ${order['delivery_address']}\n'
                     'Şehir: ${order['city']}',
                   ),
+                  trailing: delivery['status'] == 'Delivered'
+                      ? const Icon(Icons.check_circle, color: Colors.green)
+                      : ElevatedButton(
+                          onPressed: () {
+                            markAsDelivered(
+                              order['order_id'],
+                              delivery['delivery_id'],
+                            );
+                          },
+                          child: const Text('Teslim Ettim'),
+                        ),
                 ),
               );
             },

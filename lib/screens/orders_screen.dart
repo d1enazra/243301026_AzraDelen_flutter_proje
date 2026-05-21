@@ -14,7 +14,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Future<List<dynamic>> getOrders() async {
     final data = await supabase
         .from('orders')
-        .select()
+        .select('''
+          order_id,
+          total_price,
+          status,
+          city,
+          delivery_address,
+          payment_method,
+          order_details(
+            quantity,
+            unit_price,
+            menu_items(item_name)
+          )
+        ''')
         .order('order_id', ascending: false);
 
     return data;
@@ -27,16 +39,25 @@ class _OrdersScreenState extends State<OrdersScreen> {
       body: FutureBuilder<List<dynamic>>(
         future: getOrders(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final orders = snapshot.data ?? [];
+          final orders = snapshot.data!;
 
           return ListView.builder(
             itemCount: orders.length,
             itemBuilder: (context, index) {
               final order = orders[index];
+
+              final details = order['order_details'] as List<dynamic>? ?? [];
+
+              final productText = details
+                  .map((detail) {
+                    final menuItem = detail['menu_items'];
+                    return '${detail['quantity']} x ${menuItem?['item_name'] ?? 'Ürün'}';
+                  })
+                  .join(', ');
 
               return Card(
                 margin: const EdgeInsets.all(12),
@@ -46,17 +67,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     'Sipariş #${order['order_id']} - ${order['total_price']} TL',
                   ),
                   subtitle: Text(
+                    'Ürünler: $productText\n'
                     'Durum: ${order['status']}\n'
+                    'Ödeme: ${order['payment_method'] ?? '-'}\n'
                     'Şehir: ${order['city']}\n'
                     'Adres: ${order['delivery_address']}',
-                    style: TextStyle(
-                      color: order['status'] == 'Delivered'
-                          ? Colors.green
-                          : order['status'] == 'On Delivery'
-                          ? Colors.orange
-                          : Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
                   ),
                 ),
               );

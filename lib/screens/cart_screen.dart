@@ -25,6 +25,7 @@ class _CartScreenState extends State<CartScreen> {
     final addressController = TextEditingController(
       text: SessionService.address,
     );
+    final cityController = TextEditingController();
 
     await showDialog(
       context: context,
@@ -40,6 +41,10 @@ class _CartScreenState extends State<CartScreen> {
               TextField(
                 controller: addressController,
                 decoration: const InputDecoration(labelText: 'Teslimat Adresi'),
+              ),
+              TextField(
+                controller: cityController,
+                decoration: const InputDecoration(labelText: 'Şehir'),
               ),
               DropdownButtonFormField<String>(
                 value: paymentMethod,
@@ -74,7 +79,7 @@ class _CartScreenState extends State<CartScreen> {
                       'total_price': CartService.totalPrice,
                       'status': 'Preparing',
                       'delivery_address': addressController.text.trim(),
-                      'city': 'Konya',
+                      'city': cityController.text.trim(),
                       'payment_method': paymentMethod,
                     })
                     .select()

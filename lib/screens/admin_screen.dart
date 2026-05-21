@@ -23,6 +23,17 @@ class _AdminScreenState extends State<AdminScreen> {
         .from('orders')
         .update({'status': status})
         .eq('order_id', orderId);
+
+    await supabase
+        .from('deliveries')
+        .update({'status': status})
+        .eq('order_id', orderId);
+
+    await supabase.from('logs').insert({
+      'user_id': 1,
+      'action': 'Admin sipariş #$orderId durumunu $status yaptı',
+    });
+
     setState(() {});
   }
 

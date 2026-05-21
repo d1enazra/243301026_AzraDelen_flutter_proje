@@ -9,25 +9,24 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final supabase = Supabase.instance.client;
+
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final phoneController = TextEditingController();
   final addressController = TextEditingController();
 
+  String selectedRole = 'customer';
+
   Future<void> register() async {
     try {
-      await Supabase.instance.client.auth.signUp(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
-
-      await Supabase.instance.client.from('users').insert({
+      await supabase.from('users').insert({
         'full_name': nameController.text.trim(),
         'email': emailController.text.trim(),
-        'role': 'customer',
         'phone': phoneController.text.trim(),
         'address': addressController.text.trim(),
+        'role': selectedRole,
       });
 
       if (!mounted) return;
@@ -40,7 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Hata: $e')));
+      ).showSnackBar(SnackBar(content: Text('Kayıt hatası: $e')));
     }
   }
 
@@ -49,33 +48,57 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Kayıt Ol')),
       body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: ListView(
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Ad Soyad'),
-            ),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: 'E-posta'),
-            ),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Şifre'),
-            ),
-            TextField(
-              controller: phoneController,
-              decoration: const InputDecoration(labelText: 'Telefon'),
-            ),
-            TextField(
-              controller: addressController,
-              decoration: const InputDecoration(labelText: 'Adres'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(onPressed: register, child: const Text('Kayıt Ol')),
-          ],
+        padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Ad Soyad'),
+              ),
+              TextField(
+                controller: emailController,
+                decoration: const InputDecoration(labelText: 'E-posta'),
+              ),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(labelText: 'Şifre'),
+              ),
+              TextField(
+                controller: phoneController,
+                decoration: const InputDecoration(labelText: 'Telefon'),
+              ),
+              TextField(
+                controller: addressController,
+                decoration: const InputDecoration(labelText: 'Adres'),
+              ),
+
+              const SizedBox(height: 12),
+
+              DropdownButtonFormField<String>(
+                value: selectedRole,
+                decoration: const InputDecoration(labelText: 'Rol'),
+                items: const [
+                  DropdownMenuItem(value: 'customer', child: Text('Müşteri')),
+                  DropdownMenuItem(value: 'courier', child: Text('Kurye')),
+                  DropdownMenuItem(value: 'admin', child: Text('Admin')),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    selectedRole = value!;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+              ElevatedButton(
+                onPressed: register,
+                child: const Text('Kayıt Ol'),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -4,6 +4,8 @@ import 'orders_screen.dart';
 import 'logs_screen.dart';
 import 'admin_screen.dart';
 import 'tracking_screen.dart';
+import 'profile_screen.dart';
+import '../services/session_service.dart';
 
 class CategoryScreen extends StatelessWidget {
   const CategoryScreen({super.key});
@@ -39,23 +41,34 @@ class CategoryScreen extends StatelessWidget {
             },
             icon: const Icon(Icons.history),
           ),
+          if (SessionService.role == 'admin')
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AdminScreen()),
+                );
+              },
+              icon: const Icon(Icons.admin_panel_settings),
+            ),
+          if (SessionService.role == 'courier')
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const TrackingScreen()),
+                );
+              },
+              icon: const Icon(Icons.delivery_dining),
+            ),
           IconButton(
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const AdminScreen()),
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
               );
             },
-            icon: const Icon(Icons.admin_panel_settings),
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const TrackingScreen()),
-              );
-            },
-            icon: const Icon(Icons.delivery_dining),
+            icon: const Icon(Icons.person),
           ),
         ],
       ),

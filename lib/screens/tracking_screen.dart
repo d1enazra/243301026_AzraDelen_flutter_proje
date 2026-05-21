@@ -16,7 +16,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
     return await supabase
         .from('deliveries')
         .select(
-          'delivery_id, status, estimated_minutes, courier_name, orders(order_id, user_id, delivery_address, city, total_price)',
+          'delivery_id, courier_id, status, estimated_minutes, courier_name, orders(order_id, user_id, delivery_address, city, total_price)',
         )
         .order('delivery_id', ascending: false);
   }
@@ -73,7 +73,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
                   ),
                   trailing: delivery['status'] == 'Delivered'
                       ? const Icon(Icons.check_circle, color: Colors.green)
-                      : ElevatedButton(
+                      : delivery['courier_id'] == SessionService.userId
+                      ? ElevatedButton(
                           onPressed: () {
                             markAsDelivered(
                               order['order_id'],
@@ -81,7 +82,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
                             );
                           },
                           child: const Text('Teslim Ettim'),
-                        ),
+                        )
+                      : const Text('Başka Kurye'),
                 ),
               );
             },

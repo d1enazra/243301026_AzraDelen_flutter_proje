@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
 import 'register_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'category_screen.dart';
+import '../services/session_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,11 +15,36 @@ class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  void login() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-    );
+  Future<void> login() async {
+    try {
+      final user = await Supabase.instance.client
+          .from('users')
+          .select()
+          .eq('email', emailController.text.trim())
+          .maybeSingle();
+
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Bu e-posta ile kayıtlı kullanıcı bulunamadı'),
+          ),
+        );
+        return;
+      }
+
+      SessionService.currentUser = user;
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const CategoryScreen()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Giriş hatası: $e')));
+    }
   }
 
   @override

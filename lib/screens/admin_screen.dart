@@ -51,7 +51,9 @@ class _AdminScreenState extends State<AdminScreen> {
                     'Sipariş #${order['order_id']} - ${order['total_price']} TL',
                   ),
                   subtitle: Text(
-                    '${order['status']} - ${order['city']}',
+                    'Durum: ${order['status']}\n'
+                    'Şehir: ${order['city']}\n'
+                    'Adres: ${order['delivery_address']}',
                     style: TextStyle(
                       color: order['status'] == 'Delivered'
                           ? Colors.green

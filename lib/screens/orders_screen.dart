@@ -41,9 +41,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
               return Card(
                 margin: const EdgeInsets.all(12),
                 child: ListTile(
-                  title: Text('${order['total_price']} TL'),
+                  leading: const Icon(Icons.receipt_long),
+                  title: Text(
+                    'Sipariş #${order['order_id']} - ${order['total_price']} TL',
+                  ),
                   subtitle: Text(
-                    '${order['status']} - ${order['city']}',
+                    'Durum: ${order['status']}\n'
+                    'Şehir: ${order['city']}\n'
+                    'Adres: ${order['delivery_address']}',
                     style: TextStyle(
                       color: order['status'] == 'Delivered'
                           ? Colors.green

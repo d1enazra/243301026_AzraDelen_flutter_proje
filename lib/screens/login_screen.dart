@@ -41,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
           .eq('user_id', user['user_id']);
 
       user['role'] = selectedRole;
-      SessionService.currentUser = user;
+      await SessionService.saveSession(user);
 
       if (!mounted) return;
 

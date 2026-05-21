@@ -100,8 +100,8 @@ class ProfileScreen extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      SessionService.currentUser = null;
+                    onPressed: () async {
+                      await SessionService.clearSession();
 
                       Navigator.pushAndRemoveUntil(
                         context,

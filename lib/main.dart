@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'screens/login_screen.dart';
+import 'screens/category_screen.dart';
+import 'services/session_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,13 +13,15 @@ Future<void> main() async {
     anonKey: 'sb_publishable_fZ4ppGLZlnGgOvIueBNWMw_LV4xcptv',
   );
 
-  runApp(const MyApp());
+  final hasSession = await SessionService.loadSession();
+
+  runApp(MyApp(hasSession: hasSession));
 }
 
-final supabase = Supabase.instance.client;
-
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool hasSession;
+
+  const MyApp({super.key, required this.hasSession});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +32,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: const LoginScreen(),
+      home: hasSession ? const CategoryScreen() : const LoginScreen(),
     );
   }
 }

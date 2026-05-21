@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../services/session_service.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -27,6 +28,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             menu_items(item_name)
           )
         ''')
+        .eq('user_id', SessionService.userId)
         .order('order_id', ascending: false);
 
     return data;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'orders_screen.dart';
+import 'logs_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,19 +19,27 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> createOrder(Map item) async {
-    await supabase.from('orders').insert({
-      'user_id': 1,
-      'total_price': item['price'],
-      'status': 'Preparing',
-      'delivery_address': 'Konya Merkez',
-      'city': 'Konya',
-    });
+    try {
+      await supabase.from('orders').insert({
+        'user_id': 1,
+        'total_price': item['price'],
+        'status': 'Preparing',
+        'delivery_address': 'Konya Merkez',
+        'city': 'Konya',
+      });
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${item['item_name']} sipariş verildi')),
-    );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${item['item_name']} sipariş verildi')),
+      );
+
+      setState(() {});
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Sipariş hatası: $e')));
+    }
   }
 
   @override
@@ -48,6 +57,15 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
             icon: const Icon(Icons.shopping_bag),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LogsScreen()),
+              );
+            },
+            icon: const Icon(Icons.history),
           ),
         ],
       ),

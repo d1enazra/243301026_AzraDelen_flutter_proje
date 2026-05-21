@@ -77,6 +77,12 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             icon: const Icon(Icons.admin_panel_settings),
           ),
+          IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(Icons.logout),
+          ),
         ],
       ),
       body: FutureBuilder<List<dynamic>>(
@@ -98,6 +104,10 @@ class _HomeScreenState extends State<HomeScreen> {
               final item = items[index];
 
               return Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 margin: const EdgeInsets.all(12),
                 child: ListTile(
                   title: Text(item['item_name']),

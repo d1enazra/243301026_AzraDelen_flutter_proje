@@ -42,7 +42,17 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 margin: const EdgeInsets.all(12),
                 child: ListTile(
                   title: Text('${order['total_price']} TL'),
-                  subtitle: Text('${order['status']} - ${order['city']}'),
+                  subtitle: Text(
+                    '${order['status']} - ${order['city']}',
+                    style: TextStyle(
+                      color: order['status'] == 'Delivered'
+                          ? Colors.green
+                          : order['status'] == 'On Delivery'
+                          ? Colors.orange
+                          : Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               );
             },

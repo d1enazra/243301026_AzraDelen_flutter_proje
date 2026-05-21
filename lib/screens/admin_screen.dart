@@ -50,7 +50,17 @@ class _AdminScreenState extends State<AdminScreen> {
                   title: Text(
                     'Sipariş #${order['order_id']} - ${order['total_price']} TL',
                   ),
-                  subtitle: Text('${order['status']} - ${order['city']}'),
+                  subtitle: Text(
+                    '${order['status']} - ${order['city']}',
+                    style: TextStyle(
+                      color: order['status'] == 'Delivered'
+                          ? Colors.green
+                          : order['status'] == 'On Delivery'
+                          ? Colors.orange
+                          : Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   trailing: PopupMenuButton<String>(
                     onSelected: (value) {
                       updateStatus(order['order_id'], value);

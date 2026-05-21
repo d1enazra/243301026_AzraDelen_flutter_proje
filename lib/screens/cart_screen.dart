@@ -1,30 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../services/session_service.dart';
 import '../services/cart_service.dart';
-import 'cart_screen.dart';
+import '../services/session_service.dart';
 
-class MenuScreen extends StatefulWidget {
-  final String category;
-
-  const MenuScreen({super.key, required this.category});
+class CartScreen extends StatefulWidget {
+  const CartScreen({super.key});
 
   @override
-  State<MenuScreen> createState() => _MenuScreenState();
+  State<CartScreen> createState() => _CartScreenState();
 }
 
-class _MenuScreenState extends State<MenuScreen> {
+class _CartScreenState extends State<CartScreen> {
   final supabase = Supabase.instance.client;
+  String paymentMethod = 'Kapıda Ödeme';
 
-  Future<List<dynamic>> getItems() async {
-    return await supabase
-        .from('menu_items')
-        .select()
-        .eq('category', widget.category);
-  }
+  Future<void> confirmOrder() async {
+    if (CartService.items.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Sepet boş')));
+      return;
+    }
 
-  Future<void> orderItem(Map item) async {
-    String paymentMethod = 'Kapıda Ödeme';
     final addressController = TextEditingController(
       text: SessionService.address,
     );
@@ -33,7 +30,7 @@ class _MenuScreenState extends State<MenuScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('${item['item_name']} Siparişi'),
+          title: const Text('Siparişi Onayla'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -74,7 +71,7 @@ class _MenuScreenState extends State<MenuScreen> {
                     .from('orders')
                     .insert({
                       'user_id': SessionService.userId,
-                      'total_price': item['price'],
+                      'total_price': CartService.totalPrice,
                       'status': 'Preparing',
                       'delivery_address': addressController.text.trim(),
                       'city': 'Konya',
@@ -83,12 +80,14 @@ class _MenuScreenState extends State<MenuScreen> {
                     .select()
                     .single();
 
-                await supabase.from('order_details').insert({
-                  'order_id': insertedOrder['order_id'],
-                  'item_id': item['item_id'],
-                  'quantity': 1,
-                  'unit_price': item['price'],
-                });
+                for (var item in CartService.items) {
+                  await supabase.from('order_details').insert({
+                    'order_id': insertedOrder['order_id'],
+                    'item_id': item['item_id'],
+                    'quantity': item['quantity'],
+                    'unit_price': item['price'],
+                  });
+                }
 
                 await supabase.from('deliveries').insert({
                   'order_id': insertedOrder['order_id'],
@@ -98,79 +97,66 @@ class _MenuScreenState extends State<MenuScreen> {
                   'estimated_minutes': 35,
                 });
 
+                CartService.clearCart();
+
                 if (!mounted) return;
 
                 Navigator.pop(context);
+                Navigator.pop(context);
 
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${item['item_name']} sipariş edildi'),
-                  ),
+                  const SnackBar(content: Text('Sipariş oluşturuldu')),
                 );
               },
-              child: const Text('Siparişi Onayla'),
+              child: const Text('Onayla'),
             ),
           ],
         );
       },
     );
+
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final items = CartService.items;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.category),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const CartScreen()),
-              );
-            },
-            icon: const Icon(Icons.shopping_cart),
+      appBar: AppBar(title: const Text('Sepetim')),
+      body: items.isEmpty
+          ? const Center(child: Text('Sepet boş'))
+          : ListView.builder(
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                final item = items[index];
+
+                return Card(
+                  margin: const EdgeInsets.all(12),
+                  child: ListTile(
+                    title: Text(item['item_name']),
+                    subtitle: Text(
+                      'Adet: ${item['quantity']} - ${item['price']} TL',
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        CartService.removeItem(item['item_id']);
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ElevatedButton(
+          onPressed: confirmOrder,
+          child: Text(
+            'Siparişi Onayla - ${CartService.totalPrice.toStringAsFixed(2)} TL',
           ),
-        ],
-      ),
-      body: FutureBuilder<List<dynamic>>(
-        future: getItems(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          final items = snapshot.data!;
-
-          return ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index];
-
-              return Card(
-                margin: const EdgeInsets.all(12),
-                child: ListTile(
-                  title: Text(item['item_name']),
-                  subtitle: Text(
-                    '${item['description'] ?? ''}\n${item['price']} TL',
-                  ),
-                  trailing: ElevatedButton(
-                    onPressed: () {
-                      CartService.addItem(item);
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('${item['item_name']} sepete eklendi'),
-                        ),
-                      );
-                    },
-                    child: const Text('Sepete Ekle'),
-                  ),
-                ),
-              );
-            },
-          );
-        },
+        ),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'admin_screen.dart';
 import 'tracking_screen.dart';
 import 'profile_screen.dart';
 import '../services/session_service.dart';
+import 'menu_management_screen.dart';
 
 class CategoryScreen extends StatelessWidget {
   const CategoryScreen({super.key});
@@ -50,6 +51,18 @@ class CategoryScreen extends StatelessWidget {
                 );
               },
               icon: const Icon(Icons.admin_panel_settings),
+            ),
+          if (SessionService.role == 'admin')
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const MenuManagementScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.restaurant_menu),
             ),
           if (SessionService.role == 'courier')
             IconButton(

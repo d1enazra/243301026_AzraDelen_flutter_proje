@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/session_service.dart';
 import '../services/cart_service.dart';
 import 'cart_screen.dart';
+import 'food_detail_screen.dart';
 
 class MenuScreen extends StatefulWidget {
   final String category;
@@ -146,25 +147,48 @@ class _MenuScreenState extends State<MenuScreen> {
             itemCount: items.length,
             itemBuilder: (context, index) {
               final item = items[index];
+              final stock = item['stock_quantity'] ?? 0;
 
-              return Card(
-                margin: const EdgeInsets.all(12),
-                child: ListTile(
-                  title: Text(item['item_name']),
-                  subtitle: Text(
-                    '${item['description'] ?? ''}\n${item['price']} TL',
-                  ),
-                  trailing: ElevatedButton(
-                    onPressed: () {
-                      CartService.addItem(item);
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FoodDetailScreen(item: item),
+                    ),
+                  );
+                },
+                child: Card(
+                  margin: const EdgeInsets.all(12),
+                  child: ListTile(
+                    title: Text(item['item_name']),
+                    subtitle: Text(
+                      '${item['description'] ?? ''}\n'
+                      '${item['price']} TL\n'
+                      'Stok: $stock',
+                    ),
+                    trailing: stock <= 0
+                        ? const Text(
+                            'Tükendi',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : ElevatedButton(
+                            onPressed: () {
+                              CartService.addItem(item);
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('${item['item_name']} sepete eklendi'),
-                        ),
-                      );
-                    },
-                    child: const Text('Sepete Ekle'),
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    '${item['item_name']} sepete eklendi',
+                                  ),
+                                ),
+                              );
+                            },
+                            child: const Text('Sepete Ekle'),
+                          ),
                   ),
                 ),
               );

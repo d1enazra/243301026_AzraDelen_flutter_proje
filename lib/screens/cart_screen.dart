@@ -79,7 +79,7 @@ class _CartScreenState extends State<CartScreen> {
                       'total_price': CartService.totalPrice,
                       'status': 'Preparing',
                       'delivery_address': addressController.text.trim(),
-                      'city': cityController.text.trim(),
+
                       'payment_method': paymentMethod,
                     })
                     .select()
@@ -92,6 +92,13 @@ class _CartScreenState extends State<CartScreen> {
                     'quantity': item['quantity'],
                     'unit_price': item['price'],
                   });
+                  await supabase
+                      .from('menu_items')
+                      .update({
+                        'stock_quantity':
+                            item['stock_quantity'] - item['quantity'],
+                      })
+                      .eq('item_id', item['item_id']);
                 }
 
                 await supabase.from('deliveries').insert({

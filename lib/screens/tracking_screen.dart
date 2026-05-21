@@ -64,12 +64,33 @@ class _TrackingScreenState extends State<TrackingScreen> {
                 child: ListTile(
                   leading: const Icon(Icons.delivery_dining),
                   title: Text('Sipariş #${order['order_id']}'),
-                  subtitle: Text(
-                    'Kurye: ${delivery['courier_name'] ?? 'Atanmadı'}\n'
-                    'Durum: ${delivery['status']}\n'
-                    'Tahmini süre: ${delivery['estimated_minutes'] ?? 30} dakika\n'
-                    'Adres: ${order['delivery_address']}\n'
-                    'Şehir: ${order['city']}',
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Kurye: ${delivery['courier_name'] ?? 'Atanmadı'}'),
+                      Text(
+                        'Tahmini süre: ${delivery['estimated_minutes'] ?? 30} dakika',
+                      ),
+                      Text('Adres: ${order['delivery_address']}'),
+                      Text('Şehir: ${order['city']}'),
+                      const SizedBox(height: 8),
+                      LinearProgressIndicator(
+                        value: delivery['status'] == 'Delivered'
+                            ? 1.0
+                            : delivery['status'] == 'On Delivery'
+                            ? 0.7
+                            : 0.3,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        delivery['status'] == 'Delivered'
+                            ? 'Teslim Edildi'
+                            : delivery['status'] == 'On Delivery'
+                            ? 'Yolda'
+                            : 'Hazırlanıyor',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
                   trailing: delivery['status'] == 'Delivered'
                       ? const Icon(Icons.check_circle, color: Colors.green)
